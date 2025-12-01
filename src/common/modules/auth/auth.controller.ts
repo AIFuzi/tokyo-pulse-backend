@@ -1,4 +1,13 @@
-import { Controller, Get } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+} from '@nestjs/common'
+import { CreateUserDto } from '@/src/common/modules/auth/dto'
 
 import { AuthService } from './auth.service'
 
@@ -9,5 +18,22 @@ export class AuthController {
   @Get('me')
   getMe() {
     return this.authService.getMe()
+  }
+
+  @HttpCode(HttpStatus.CREATED)
+  @Post('register')
+  async create(@Body() dto: CreateUserDto) {
+    return this.authService.create(dto)
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('user/:login')
+  async getUser(@Param('login') login: string) {
+    return this.authService.getUser(login)
+  }
+
+  @Get('users')
+  async getAll() {
+    return this.authService.getAllUsers()
   }
 }

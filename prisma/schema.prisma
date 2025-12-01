@@ -11,9 +11,9 @@ datasource db {
 model User {
   id String @id @default(uuid())
 
-  Name     String
-  Login    String @unique
-  Password String
+  name     String
+  login    String @unique
+  password String
 
   createdAt DateTime @default(now()) @map("created_at")
   updateAt  DateTime @updatedAt @map("updated_at")
