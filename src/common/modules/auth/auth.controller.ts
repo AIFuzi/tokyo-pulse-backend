@@ -36,6 +36,12 @@ export class AuthController {
     return this.authService.login(res, dto)
   }
 
+  @HttpCode(HttpStatus.OK)
+  @Post('logout')
+  async logout(@Res({ passthrough: true }) res: Response) {
+    return this.authService.logout(res)
+  }
+
   @Authorization()
   @HttpCode(HttpStatus.OK)
   @Get('user')

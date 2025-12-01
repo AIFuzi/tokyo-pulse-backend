@@ -74,6 +74,12 @@ export class AuthService {
     return this.auth(res, user.id)
   }
 
+  async logout(res: Response) {
+    this.setCookie(res, 'token', new Date(0))
+
+    return true
+  }
+
   async getUser(login: string) {
     if (!login) {
       throw new BadRequestException('Login required')
