@@ -18,6 +18,8 @@ model User {
   role   Role?
   roleId String?
 
+  News News[]
+
   createdAt DateTime @default(now()) @map("created_at")
   updateAt  DateTime @updatedAt @map("updated_at")
 
@@ -36,6 +38,22 @@ model Role {
   updateAt  DateTime @updatedAt @map("updated_at")
 
   @@map("roles")
+}
+
+model News {
+  id String @id @default(uuid())
+
+  title       String
+  image       String
+  description String
+
+  author User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updateAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("news")
 }
 
 enum roleTypes {

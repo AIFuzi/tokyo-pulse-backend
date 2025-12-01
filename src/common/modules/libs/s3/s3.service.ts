@@ -23,7 +23,7 @@ export class S3Service {
       forcePathStyle: true,
     })
 
-    this.bucket = configService.getOrThrow<string>('S3_BUCKET')
+    this.bucket = configService.getOrThrow<string>('S3_BUCKET_NAME')
   }
 
   async upload(buffer: Buffer, key: string, mimetype: string) {
