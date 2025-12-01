@@ -1,7 +1,12 @@
 import {
   Body,
   Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
   Post,
+  Query,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common'
@@ -30,5 +35,24 @@ export class NewsController {
     @Authorized('id') userId: string,
   ) {
     return this.newsService.create(dto, file, userId)
+  }
+
+  @Authorization('ADMIN')
+  @Delete('delete/:id')
+  async delete(@Param('id') id: string) {
+    return this.newsService.remove(id)
+  }
+
+  @Get()
+  async getAll(
+    @Query('page', ParseIntPipe) page: number,
+    @Query('limit', ParseIntPipe) limit: number,
+  ) {
+    return this.newsService.getAll(page, limit)
+  }
+
+  @Get(':id')
+  async getOne(@Param('id') id: string) {
+    return this.newsService.getOne(id)
   }
 }

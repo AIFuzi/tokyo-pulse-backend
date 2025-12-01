@@ -3,7 +3,7 @@ import { IsNotEmpty, IsString, Length } from 'class-validator'
 export class CreateNewsDto {
   @IsString()
   @IsNotEmpty()
-  @Length(8, 64)
+  @Length(4, 64)
   title: string
 
   @IsString()

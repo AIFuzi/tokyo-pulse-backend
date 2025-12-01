@@ -1,7 +1,7 @@
 import * as sharp from 'sharp'
 import { v4 } from 'uuid'
 
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { S3Service } from '@/src/common/modules/libs/s3/s3.service'
 import { CreateNewsDto } from '@/src/common/modules/news/dto'
 import { PrismaService } from '@/src/core/prisma/prisma.service'
@@ -47,9 +47,56 @@ export class NewsService {
     })
   }
 
-  async remove() {}
+  async remove(newsId: string) {
+    const foundedNews = await this.prismaService.news.findUnique({
+      where: { id: newsId },
+    })
+    if (!foundedNews) {
+      throw new NotFoundException('News not found')
+    }
 
-  async getAll() {}
+    await this.s3.remove(foundedNews.image)
 
-  async getOne(id: string) {}
+    await this.prismaService.news.delete({
+      where: {
+        id: foundedNews.id,
+      },
+    })
+
+    return true
+  }
+
+  async getAll(page: number, limit: number) {
+    const skip = (page - 1) * limit
+
+    const news = await this.prismaService.news.findMany({
+      skip,
+      take: limit,
+      orderBy: {
+        createdAt: 'desc',
+      },
+    })
+
+    const total = await this.prismaService.news.count()
+
+    return { news, total }
+  }
+
+  async getOne(id: string) {
+    const foundedNews = await this.prismaService.news.findFirst({
+      where: { id },
+      include: {
+        author: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    })
+    if (!foundedNews) {
+      throw new NotFoundException('News not found')
+    }
+
+    return foundedNews
+  }
 }
