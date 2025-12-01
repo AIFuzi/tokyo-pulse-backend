@@ -8,10 +8,10 @@ import {
   UnauthorizedException,
 } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
-import { CreateUserDto } from '@/src/common/modules/auth/dto'
-import { LoginUserDto } from '@/src/common/modules/auth/dto/login-user.dto'
+import { CreateUserDto, LoginUserDto } from '@/src/common/modules/auth/dto'
 import { JwtPayload } from '@/src/common/modules/auth/interfaces/jwt.interface'
 import { PrismaService } from '@/src/core/prisma/prisma.service'
+import { roleTypes } from '@prisma/generated/enums'
 
 @Injectable()
 export class AuthService {
@@ -20,12 +20,8 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  getMe() {
-    return { message: 'Name' }
-  }
-
   async create(dto: CreateUserDto) {
-    const { name, password, login } = dto
+    const { name, password, login, role } = dto
 
     const isExistUser = await this.prismaService.user.findUnique({
       where: {
@@ -43,6 +39,12 @@ export class AuthService {
         login,
         name,
         password: hashedPassword,
+        role: {
+          create: role ? { role: roleTypes.ADMIN } : { role: roleTypes.USER },
+        },
+      },
+      include: {
+        role: true,
       },
     })
 
@@ -54,6 +56,9 @@ export class AuthService {
 
     const user = await this.prismaService.user.findUnique({
       where: { login },
+      include: {
+        role: true,
+      },
     })
 
     if (!user) {
@@ -92,6 +97,11 @@ export class AuthService {
       select: {
         login: true,
         name: true,
+        role: {
+          select: {
+            role: true,
+          },
+        },
       },
     })
   }
@@ -100,6 +110,9 @@ export class AuthService {
     const user = await this.prismaService.user.findUnique({
       where: {
         id,
+      },
+      include: {
+        role: true,
       },
     })
 

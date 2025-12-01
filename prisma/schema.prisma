@@ -15,8 +15,30 @@ model User {
   login    String @unique
   password String
 
+  role   Role?
+  roleId String?
+
   createdAt DateTime @default(now()) @map("created_at")
   updateAt  DateTime @updatedAt @map("updated_at")
 
   @@map("users")
+}
+
+model Role {
+  id String @id @default(uuid())
+
+  role roleTypes @default(USER)
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @unique
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updateAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("roles")
+}
+
+enum roleTypes {
+  USER
+  ADMIN
 }

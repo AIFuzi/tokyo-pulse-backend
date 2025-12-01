@@ -4,23 +4,16 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Param,
   Post,
 } from '@nestjs/common'
-import { CreateUserDto } from '@/src/common/modules/auth/dto'
-import { LoginUserDto } from '@/src/common/modules/auth/dto/login-user.dto'
-import { Authorization } from '@/src/shared/decorators'
+import { CreateUserDto, LoginUserDto } from '@/src/common/modules/auth/dto'
+import { Authorization, Authorized } from '@/src/shared/decorators'
 
 import { AuthService } from './auth.service'
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-
-  @Get('me')
-  getMe() {
-    return this.authService.getMe()
-  }
 
   @HttpCode(HttpStatus.CREATED)
   @Post('register')
@@ -34,13 +27,14 @@ export class AuthController {
     return this.authService.login(dto)
   }
 
+  @Authorization()
   @HttpCode(HttpStatus.OK)
-  @Get('user/:login')
-  async getUser(@Param('login') login: string) {
+  @Get('user')
+  async getUser(@Authorized('login') login: string) {
     return this.authService.getUser(login)
   }
 
-  @Authorization()
+  @Authorization('ADMIN')
   @Get('users')
   async getAll() {
     return this.authService.getAllUsers()
