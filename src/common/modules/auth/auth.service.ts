@@ -1,4 +1,5 @@
 import { hash, verify } from 'argon2'
+import type { Response } from 'express'
 
 import {
   BadRequestException,
@@ -20,7 +21,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async create(dto: CreateUserDto) {
+  async create(res: Response, dto: CreateUserDto) {
     const { name, password, login, role } = dto
 
     const isExistUser = await this.prismaService.user.findUnique({
@@ -48,10 +49,10 @@ export class AuthService {
       },
     })
 
-    return this.generateToken(user.id)
+    return this.auth(res, user.id)
   }
 
-  async login(dto: LoginUserDto) {
+  async login(res: Response, dto: LoginUserDto) {
     const { login, password } = dto
 
     const user = await this.prismaService.user.findUnique({
@@ -70,7 +71,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid password')
     }
 
-    return this.generateToken(user.id)
+    return this.auth(res, user.id)
   }
 
   async getUser(login: string) {
@@ -126,10 +127,23 @@ export class AuthService {
   private generateToken(id: string) {
     const payload: JwtPayload = { id }
 
-    const token = this.jwtService.sign(payload, {
+    return this.jwtService.sign(payload, {
       expiresIn: '30d',
     })
+  }
 
-    return { token }
+  private auth(res: Response, id: string) {
+    const token = this.generateToken(id)
+
+    this.setCookie(res, token, new Date(Date.now() + 60 * 60 * 24 * 30))
+  }
+
+  private setCookie(res: Response, value: string, expires: Date) {
+    res.cookie('token', value, {
+      httpOnly: true,
+      expires,
+      secure: false,
+      sameSite: 'lax',
+    })
   }
 }

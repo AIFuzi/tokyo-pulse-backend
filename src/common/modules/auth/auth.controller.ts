@@ -1,3 +1,5 @@
+import type { Response } from 'express'
+
 import {
   Body,
   Controller,
@@ -5,6 +7,7 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Res,
 } from '@nestjs/common'
 import { CreateUserDto, LoginUserDto } from '@/src/common/modules/auth/dto'
 import { Authorization, Authorized } from '@/src/shared/decorators'
@@ -17,14 +20,20 @@ export class AuthController {
 
   @HttpCode(HttpStatus.CREATED)
   @Post('register')
-  async create(@Body() dto: CreateUserDto) {
-    return this.authService.create(dto)
+  async create(
+    @Res({ passthrough: true }) res: Response,
+    @Body() dto: CreateUserDto,
+  ) {
+    return this.authService.create(res, dto)
   }
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  async login(@Body() dto: LoginUserDto) {
-    return this.authService.login(dto)
+  async login(
+    @Res({ passthrough: true }) res: Response,
+    @Body() dto: LoginUserDto,
+  ) {
+    return this.authService.login(res, dto)
   }
 
   @Authorization()
