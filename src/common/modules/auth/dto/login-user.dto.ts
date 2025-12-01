@@ -1,18 +1,13 @@
 import { IsNotEmpty, IsString, Length } from 'class-validator'
 
-export class CreateUserDto {
+export class LoginUserDto {
   @IsString()
   @IsNotEmpty()
-  @Length(0, 12)
-  name: string
-
-  @IsString()
-  @IsNotEmpty()
-  @Length(3, 12)
+  @Length(3, 64)
   login: string
 
   @IsString()
   @IsNotEmpty()
-  @Length(3, 12)
+  @Length(8, 64)
   password: string
 }

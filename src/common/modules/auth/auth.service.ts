@@ -1,17 +1,24 @@
-import { hash } from 'argon2'
+import { hash, verify } from 'argon2'
 
 import {
   BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common'
+import { JwtService } from '@nestjs/jwt'
 import { CreateUserDto } from '@/src/common/modules/auth/dto'
+import { LoginUserDto } from '@/src/common/modules/auth/dto/login-user.dto'
+import { JwtPayload } from '@/src/common/modules/auth/interfaces/jwt.interface'
 import { PrismaService } from '@/src/core/prisma/prisma.service'
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly jwtService: JwtService,
+  ) {}
 
   getMe() {
     return { message: 'Name' }
@@ -31,7 +38,7 @@ export class AuthService {
 
     const hashedPassword = await hash(password)
 
-    await this.prismaService.user.create({
+    const user = await this.prismaService.user.create({
       data: {
         login,
         name,
@@ -39,7 +46,26 @@ export class AuthService {
       },
     })
 
-    return true
+    return this.generateToken(user.id)
+  }
+
+  async login(dto: LoginUserDto) {
+    const { login, password } = dto
+
+    const user = await this.prismaService.user.findUnique({
+      where: { login },
+    })
+
+    if (!user) {
+      throw new NotFoundException('User not found')
+    }
+
+    const validatePassword = await verify(user.password, password)
+    if (!validatePassword) {
+      throw new UnauthorizedException('Invalid password')
+    }
+
+    return this.generateToken(user.id)
   }
 
   async getUser(login: string) {
@@ -68,5 +94,29 @@ export class AuthService {
         name: true,
       },
     })
+  }
+
+  async validate(id: string) {
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        id,
+      },
+    })
+
+    if (!user) {
+      throw new NotFoundException('User not found')
+    }
+
+    return user
+  }
+
+  private generateToken(id: string) {
+    const payload: JwtPayload = { id }
+
+    const token = this.jwtService.sign(payload, {
+      expiresIn: '30d',
+    })
+
+    return { token }
   }
 }

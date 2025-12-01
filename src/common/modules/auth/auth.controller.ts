@@ -8,6 +8,8 @@ import {
   Post,
 } from '@nestjs/common'
 import { CreateUserDto } from '@/src/common/modules/auth/dto'
+import { LoginUserDto } from '@/src/common/modules/auth/dto/login-user.dto'
+import { Authorization } from '@/src/shared/decorators'
 
 import { AuthService } from './auth.service'
 
@@ -27,11 +29,18 @@ export class AuthController {
   }
 
   @HttpCode(HttpStatus.OK)
+  @Post('login')
+  async login(@Body() dto: LoginUserDto) {
+    return this.authService.login(dto)
+  }
+
+  @HttpCode(HttpStatus.OK)
   @Get('user/:login')
   async getUser(@Param('login') login: string) {
     return this.authService.getUser(login)
   }
 
+  @Authorization()
   @Get('users')
   async getAll() {
     return this.authService.getAllUsers()
