@@ -20,12 +20,6 @@ import { NewsService } from './news.service'
 export class NewsController {
   constructor(private readonly newsService: NewsService) {}
 
-  @Post('add-image')
-  @UseInterceptors(FileInterceptor('image'))
-  async uploadFile(@UploadedFile() file: Express.Multer.File) {
-    return this.newsService.uploadFile(file)
-  }
-
   @Authorization('ADMIN')
   @Post('create')
   @UseInterceptors(FileInterceptor('image'))

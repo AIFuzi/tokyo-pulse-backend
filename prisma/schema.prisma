@@ -47,6 +47,8 @@ model News {
   image       String
   description String
 
+  viewCount Int @default(0) @map("view_count")
+
   author User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String
 

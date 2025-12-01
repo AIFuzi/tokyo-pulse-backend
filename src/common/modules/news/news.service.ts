@@ -13,18 +13,6 @@ export class NewsService {
     private readonly s3: S3Service,
   ) {}
 
-  async uploadFile(file: Express.Multer.File) {
-    const processedBuffer = await sharp(file.buffer)
-      .resize(1280, 720)
-      .webp()
-      .toBuffer()
-
-    const newNameFile = v4() + '.webp'
-
-    await this.s3.upload(processedBuffer, newNameFile, file.mimetype)
-    return { url: `http://localhost:9000/tokyo-pulse/${newNameFile}` }
-  }
-
   async create(dto: CreateNewsDto, image: Express.Multer.File, userId: string) {
     const { title, description } = dto
 
