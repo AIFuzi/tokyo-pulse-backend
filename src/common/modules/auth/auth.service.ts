@@ -90,6 +90,11 @@ export class AuthService {
       select: {
         login: true,
         name: true,
+        role: {
+          select: {
+            role: true,
+          },
+        },
       },
     })
     if (!user) {
